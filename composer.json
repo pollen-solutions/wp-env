@@ -1,0 +1,45 @@
+{
+  "name": "pollen-solutions/wp-env",
+  "description": "Pollen Wordpress Env Component - Wordpress configuration with .env file.",
+  "homepage": "https://www.presstify.com/pollen-solutions/wp-env/",
+  "keywords": [
+    "pollen solutions",
+    "wordpress",
+    "wp-config",
+    "wp-env"
+  ],
+  "time": "2021-09-10",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Jordy Manner",
+      "email": "jordy@presstify.com"
+    }
+  ],
+  "require": {
+    "php": "^7.4 || ^8.0",
+    "pollen-solutions/support": "^1.0",
+    "pollen-solutions/wp-salt": "^1.0"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^9.0",
+    "roave/security-advisories": "dev-latest"
+  },
+  "autoload": {
+    "psr-4": {
+      "Pollen\\WpEnv\\": "src"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Pollen\\WpEnv\\Test\\": "tests"
+    }
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "config": {
+    "optimize-autoloader": true,
+    "preferred-install": "dist",
+    "sort-packages": true
+  }
+}
