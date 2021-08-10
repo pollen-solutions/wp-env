@@ -36,7 +36,6 @@ APP_TIMEZONE=Europe/Paris
 
 # PATH (Optionnal)
 
-
 ## Relative public path of your application 
 APP_PUBLIC_DIR=/
 ## Relative path to the wordpress root folder, containing wp-admin and wp-includes folder 
