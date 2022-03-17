@@ -4,26 +4,42 @@ declare(strict_types=1);
 
 namespace Pollen\WpEnv;
 
+use Dotenv\Dotenv;
 use Pollen\Support\Env;
 use Pollen\Support\Filesystem as fs;
 
 class WpEnv
 {
     /**
+     * @var string
+     */
+    private $basePath;
+
+    /**
      * @param string $basePath
      */
     public function __construct(string $basePath)
     {
-        $basePath = fs::normalizePath($basePath);
-        $isStandard = $this->isStandard($basePath);
+        $this->basePath = fs::normalizePath($basePath);
+    }
 
-        Env::load($basePath);
+    /**
+     * Load Wordpress config.
+     * {@internal Used Dotenv and wp-config.local files.}
+     *
+     * @return Dotenv
+     */
+    public function load(): Dotenv
+    {
+        $isStandard = $this->isStandard();
+
+        $loader = Env::load($this->basePath);
 
         if (!isset($GLOBALS['table_prefix'])) {
             $GLOBALS['table_prefix'] = Env::get('DB_PREFIX') ?? 'wp_';
         }
 
-        $localConfig = fs::normalizePath("$basePath/config/wp-config.local.php");
+        $localConfig = fs::normalizePath("$this->basePath/config/wp-config.local.php");
         if (file_exists($localConfig)) {
             require_once $localConfig;
         }
@@ -41,7 +57,7 @@ class WpEnv
         defined('WP_ENVIRONMENT_TYPE') ?: define('WP_ENVIRONMENT_TYPE', $wpEnv);
 
         $publicDir = Env::get('APP_PUBLIC_DIR', $isStandard ? '/' : 'public');
-        $publicPath = fs::normalizePath($basePath . fs::DS . $publicDir);
+        $publicPath = fs::normalizePath($this->basePath . fs::DS . $publicDir);
 
         // Debug
         $debug = Env::get('WP_DEBUG', Env::get('APP_DEBUG'));
@@ -102,7 +118,7 @@ class WpEnv
         $wpPublicDir = ltrim(rtrim(Env::get('APP_WP_PUBLIC_DIR', $isStandard ? 'wp-content' : '/'), '/'));
         defined('WP_CONTENT_DIR') ?: define('WP_CONTENT_DIR', fs::normalizePath($publicPath . fs::DS . $wpPublicDir));
         defined('WP_CONTENT_URL') ?: define('WP_CONTENT_URL', WP_HOME . '/' . $wpPublicDir);
-        defined('ABSPATH') ?: define('ABSPATH', fs::normalizePath($basePath . fs::DS . $publicDir . fs::DS . APP_WP_DIR) . fs::DS);
+        defined('ABSPATH') ?: define('ABSPATH', fs::normalizePath($this->basePath . fs::DS . $publicDir . fs::DS . APP_WP_DIR) . fs::DS);
 
         // Multisite
         defined('WP_ALLOW_MULTISITE') ?: define('WP_ALLOW_MULTISITE', filter_var(Env::get('WP_ALLOW_MULTISITE', false), FILTER_VALIDATE_BOOLEAN));
@@ -116,19 +132,19 @@ class WpEnv
             defined('BLOG_ID_CURRENT_SITE') ?: define('BLOG_ID_CURRENT_SITE', filter_var(Env::get('BLOG_ID_CURRENT_SITE', 1), FILTER_VALIDATE_INT));
             defined('WP_DEFAULT_THEME') ?: define('WP_DEFAULT_THEME', Env::get('WP_DEFAULT_THEME', 'twentytwentyone'));
         }
+
+        return $loader;
     }
 
     /**
      * Check if Wordpress is installed in standard mode.
      *
-     * @param string $basePath
-     *
      * @return bool
      */
-    protected function isStandard(string $basePath): bool
+    protected function isStandard(): bool
     {
-        return file_exists($basePath . fs::DS . 'wp-admin') &&
-            file_exists($basePath . fs::DS . 'wp-content') &&
-            file_exists($basePath . fs::DS . 'wp-includes');
+        return file_exists($this->basePath . fs::DS . 'wp-admin') &&
+            file_exists($this->basePath . fs::DS . 'wp-content') &&
+            file_exists($this->basePath . fs::DS . 'wp-includes');
     }
 }
