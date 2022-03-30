@@ -39,7 +39,7 @@ class WpEnv
             $GLOBALS['table_prefix'] = Env::get('DB_PREFIX') ?? 'wp_';
         }
 
-        $localConfig = fs::normalizePath("$this->basePath/config/wp-config.local.php");
+        $localConfig = fs::normalizePath("$this->basePath/wp-config.local.php");
         if (file_exists($localConfig)) {
             require_once $localConfig;
         }
