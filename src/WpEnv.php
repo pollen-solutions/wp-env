@@ -8,6 +8,8 @@ use Dotenv\Dotenv;
 use Pollen\Support\Env;
 use Pollen\Support\Filesystem as fs;
 
+$table_prefix;
+
 class WpEnv
 {
     /**
@@ -15,6 +17,11 @@ class WpEnv
      */
     private $basePath;
 
+    /**
+     * @var string
+     */
+    private $tablePrefix;
+    
     /**
      * @param string $basePath
      */
@@ -117,7 +124,7 @@ class WpEnv
         defined('WP_SITEURL') ?: define('WP_SITEURL', WP_HOME . '/' . APP_WP_DIR);
         $wpPublicDir = ltrim(rtrim(Env::get('APP_WP_PUBLIC_DIR', $isStandard ? 'wp-content' : '/'), '/'));
         defined('WP_CONTENT_DIR') ?: define('WP_CONTENT_DIR', fs::normalizePath($publicPath . fs::DS . $wpPublicDir));
-        defined('WP_CONTENT_URL') ?: define('WP_CONTENT_URL', WP_HOME . '/' . $wpPublicDir);
+        defined('WP_CONTENT_URL') ?: define('WP_CONTENT_URL', rtrim(WP_HOME . '/' . $wpPublicDir, '/'));
         defined('ABSPATH') ?: define('ABSPATH', fs::normalizePath($this->basePath . fs::DS . $publicDir . fs::DS . APP_WP_DIR) . fs::DS);
 
         // Multisite
@@ -146,5 +153,13 @@ class WpEnv
         return file_exists($this->basePath . fs::DS . 'wp-admin') &&
             file_exists($this->basePath . fs::DS . 'wp-content') &&
             file_exists($this->basePath . fs::DS . 'wp-includes');
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getTablePrefix(): ?string
+    {
+        return $GLOBALS['table_prefix'] ?? $this->tablePrefix;
     }
 }
