@@ -86,9 +86,15 @@ class WpEnv
             $table_prefix = Env::get('DB_PREFIX') ?? 'wp_';
         }
 
-        // Https
+        // X_FORWARDED
         if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
             $_SERVER['HTTPS'] = 'on';
+            $forwardedProto = 'https://';
+        }
+
+        if (isset($_SERVER['HTTP_X_FORWARDED_HOST'])) {
+            $forwardedHost = $_SERVER['HTTP_HOST'] = $_SERVER['HTTP_X_FORWARDED_HOST'];
+            $forwardedUrl = ($forwardedProto ?? '//') . $forwardedHost;
         }
 
         // Salt
@@ -120,7 +126,7 @@ class WpEnv
 
         // Path
         defined('APP_WP_DIR') ?: define('APP_WP_DIR', Env::get('APP_WP_DIR', $isStandard ? '/' : 'wordpress'));
-        defined('WP_HOME') ?: define('WP_HOME', Env::get('APP_URL') ?? 'http://127.0.0.1:8000');
+        defined('WP_HOME') ?: define('WP_HOME', $forwardedUrl ?? (Env::get('APP_URL', 'http://127.0.0.1:8000')));
         defined('WP_SITEURL') ?: define('WP_SITEURL', WP_HOME . '/' . APP_WP_DIR);
         $wpPublicDir = ltrim(rtrim(Env::get('APP_WP_PUBLIC_DIR', $isStandard ? 'wp-content' : '/'), '/'));
         defined('WP_CONTENT_DIR') ?: define('WP_CONTENT_DIR', fs::normalizePath($publicPath . fs::DS . $wpPublicDir));
